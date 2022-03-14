@@ -44,7 +44,6 @@ fn_build () {
 		sed -ir "0,/max_user_connections=[0-9]\+/{s//max_user_connections=65536/}" ./src/proxysql.cfg
 		grep 'max_user_connections=' src/proxysql.cfg | head -1
 		sed -ir "s/\"0.0.0.0:[0-9]\?6032\"/\"0.0.0.0:$(expr $OFFSET + 6032)\"/" ./src/proxysql.cfg
-#		sed -ir "s/0.0.0.0:[0-9]\?6033/0.0.0.0:$(expr $OFFSET + 6033);0.0.0.0:$(expr $OFFSET + 6034);0.0.0.0:$(expr $OFFSET + 6035);0.0.0.0:$(expr $OFFSET + 6036)/" ./src/proxysql.cfg
 		sed -ir "s/\"0.0.0.0:[0-9]\?6033.\+/\"$(fn_multiport)\"/" ./src/proxysql.cfg
 		grep '0.0.0.0' src/proxysql.cfg
 		rm -f ./src/*.db
@@ -72,8 +71,18 @@ fn_benchmark () {
 		CMD=$(eval echo "${1}")
 
 		echo "============================================================================================="
+		WAIT=$(netstat -ntpa | grep WAIT | wc -l)
+		while [[ $WAIT -ge 100 ]]; do
+			echo "Waiting 10s for $WAIT connections to close ..."
+			sleep 10
+			WAIT=$(netstat -ntpa | grep WAIT | wc -l)
+		done
+		echo "Continuing with $WAIT connections in WAIT state ..."
+		sleep 60
+
 		echo "Benchmark ${VER} on port $(expr $OFFSET + 6033) ..."
 		echo "CMD: 'sleep $PAUSE; ${CMD}'"
+		sleep ${PAUSE}
 
 		for N in $(seq $LOOP); do
 
@@ -106,7 +115,9 @@ fn_benchmark () {
 
 fn_sysstats () {
 	echo "============================================================================================="
-	netstat -ntpl | grep 603 | uniq -c
+	echo "OS: $(source /etc/os-release; echo ${PRETTY_NAME})"
+	echo "Kernel: $(uname -a)"
+	inxi
 	echo "============================================================================================="
 	sysctl -w net.core.somaxconn=65535
 	sysctl -w net.core.netdev_max_backlog=65535
@@ -114,6 +125,17 @@ fn_sysstats () {
 	echo "============================================================================================="
 	ulimit -n 64000
 	ulimit -a
+	echo "============================================================================================="
+	CNT=$(netstat -ntpl | grep -P ':\d60[3456789]\d' | uniq -c | grep -v 6032 | wc -l)
+	PRT=$(expr $MULTI '*' $(echo $VERS | wc -w))
+	while [[ ! $CNT == $PRT ]]; do
+		echo "Waiting 10s for all ports to listen ..."
+		sleep 10
+		CNT=$(netstat -ntpl | grep -P ':\d60[3456789]\d' | uniq -c | grep -v 6032 | wc -l)
+	done
+	echo "Continuing with $(echo $VERS | wc -w) * $MULTI ports listening ..."
+	netstat -ntpl | grep -P ':\d60[3456789]\d' | uniq -c
+
 }
 
 ####################################################################################################
@@ -124,18 +146,17 @@ NCPUS=64
 MULTI=8
 VERS="v2.3.2 v1.4.16"
 #VERS="v2.0.17"
-LOOP=1
-PAUSE=0
+LOOP=3
+PAUSE=10
 
 killall proxysql
 sleep 5
 
 fn_build
-sleep 30
 
 fn_sysstats
 
-#fn_benchmark "./connect_speed -i 0 -c 1000 -u sbtest -p sbtest -h 127.0.0.1 -P $PORT -M $MULTI -t 1 -q 1"
+#fn_benchmark "./connect_speed -i 0 -c 100 -u sbtest -p sbtest -h 127.0.0.1 -P $PORT -M $MULTI -t 1 -q 1"
 fn_benchmark "./connect_speed -i 0 -c 10000 -u sbtest -p sbtest -h 127.0.0.1 -P $PORT -M $MULTI -t 128 -q 0"
 
 #killall proxysql
