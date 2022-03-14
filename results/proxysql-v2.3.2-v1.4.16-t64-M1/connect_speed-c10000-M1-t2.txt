@@ -1,0 +1,71 @@
+=============================================================================================
+Building v2.3.2 ...
+	threads=64
+	max_connections=65536
+	mysql_ifaces="0.0.0.0:16032"
+	interfaces="0.0.0.0:16033"
+*************************** 1. row ***************************
+@@version: 2.3.2-10-g8cd66cf
+=============================================================================================
+Building v1.4.16 ...
+	threads=64
+	max_connections=65536
+	mysql_ifaces="0.0.0.0:26032"
+	interfaces="0.0.0.0:26033"
+*************************** 1. row ***************************
+@@version: v1.4.16-0-gf954ef30
+=============================================================================================
+OS: Debian GNU/Linux 11 (bullseye)
+Kernel: Linux trx 5.15.25 #1 SMP Sun Feb 27 15:15:59 UTC 2022 x86_64 GNU/Linux
+CPU: 32-Core (4-Die) AMD Ryzen Threadripper 3970X (-MT MCP MCM-) speed/min/max: 2200/2200/3700 MHz Kernel: 5.15.25 x86_64 
+Up: 3h 10m Mem: 19124.8/128743.6 MiB (14.9%) Storage: 3.73 TiB (17.7% used) Procs: 641 Shell: Bash 5.1.4 inxi: 3.3.01 
+=============================================================================================
+net.core.somaxconn = 65535
+net.core.netdev_max_backlog = 65535
+vm.max_map_count = 536870912
+=============================================================================================
+real-time non-blocking time  (microseconds, -R) unlimited
+core file size              (blocks, -c) 0
+data seg size               (kbytes, -d) unlimited
+scheduling priority                 (-e) 0
+file size                   (blocks, -f) unlimited
+pending signals                     (-i) 514553
+max locked memory           (kbytes, -l) 16479175
+max memory size             (kbytes, -m) unlimited
+open files                          (-n) 64000
+pipe size                (512 bytes, -p) 8
+POSIX message queues         (bytes, -q) 819200
+real-time priority                  (-r) 0
+stack size                  (kbytes, -s) 8192
+cpu time                   (seconds, -t) unlimited
+max user processes                  (-u) 514553
+virtual memory              (kbytes, -v) unlimited
+file locks                          (-x) unlimited
+=============================================================================================
+     64 tcp        0      0 0.0.0.0:16033           0.0.0.0:*               LISTEN      10204/./src/proxysq 
+      1 tcp        0      0 0.0.0.0:16032           0.0.0.0:*               LISTEN      10204/./src/proxysq 
+     64 tcp        0      0 0.0.0.0:26033           0.0.0.0:*               LISTEN      10328/./src/proxysq 
+      1 tcp        0      0 0.0.0.0:26032           0.0.0.0:*               LISTEN      10328/./src/proxysq 
+=============================================================================================
+Continuing with 25 connections in WAIT state ...
+Benchmark v2.3.2 on port 16033 ...
+CMD: 'sleep 10; ./connect_speed -i 0 -c 10000 -u sbtest -p sbtest -h 127.0.0.1 -P 16033 -M 1 -t 2 -q 0'
+      1 Connections[OK/ERR]: (20000,0) . Clock time: 1033ms
+      1 Connections[OK/ERR]: (20000,0) . Clock time: 959ms
+      1 Connections[OK/ERR]: (20000,0) . Clock time: 1022ms
+SUMMARY: 3 runs, total 60000 connections, in 3014ms, at 19907 conn/s
+=============================================================================================
+Waiting 10s for 22139 connections to close ...
+Waiting 10s for 22139 connections to close ...
+Waiting 10s for 22139 connections to close ...
+Waiting 10s for 21849 connections to close ...
+Waiting 10s for 21849 connections to close ...
+Waiting 10s for 21489 connections to close ...
+Continuing with 12 connections in WAIT state ...
+Benchmark v1.4.16 on port 26033 ...
+CMD: 'sleep 10; ./connect_speed -i 0 -c 10000 -u sbtest -p sbtest -h 127.0.0.1 -P 26033 -M 1 -t 2 -q 0'
+      1 Connections[OK/ERR]: (20000,0) . Clock time: 1271ms
+      1 Connections[OK/ERR]: (20000,0) . Clock time: 1139ms
+      1 Connections[OK/ERR]: (20000,0) . Clock time: 982ms
+SUMMARY: 3 runs, total 60000 connections, in 3392ms, at 17688 conn/s
+=============================================================================================

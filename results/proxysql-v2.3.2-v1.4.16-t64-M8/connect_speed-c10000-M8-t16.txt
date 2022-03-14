@@ -1,0 +1,79 @@
+=============================================================================================
+Building v2.3.2 ...
+	threads=8
+	max_connections=65536
+	mysql_ifaces="0.0.0.0:16032"
+	interfaces="0.0.0.0:16033;0.0.0.0:16034;0.0.0.0:16035;0.0.0.0:16036;0.0.0.0:16037;0.0.0.0:16038;0.0.0.0:16039;0.0.0.0:16040"
+*************************** 1. row ***************************
+@@version: 2.3.2-10-g8cd66cf
+=============================================================================================
+Building v1.4.16 ...
+	threads=8
+	max_connections=65536
+	mysql_ifaces="0.0.0.0:26032"
+	interfaces="0.0.0.0:26033;0.0.0.0:26034;0.0.0.0:26035;0.0.0.0:26036;0.0.0.0:26037;0.0.0.0:26038;0.0.0.0:26039;0.0.0.0:26040"
+*************************** 1. row ***************************
+@@version: v1.4.16-0-gf954ef30
+=============================================================================================
+OS: Debian GNU/Linux 11 (bullseye)
+Kernel: Linux trx 5.15.25 #1 SMP Sun Feb 27 15:15:59 UTC 2022 x86_64 GNU/Linux
+CPU: 32-Core (4-Die) AMD Ryzen Threadripper 3970X (-MT MCP MCM-) speed/min/max: 1976/2200/3700 MHz Kernel: 5.15.25 x86_64 
+Up: 1h 08m Mem: 18493.3/128743.6 MiB (14.4%) Storage: 3.73 TiB (17.7% used) Procs: 639 Shell: Bash 5.1.4 inxi: 3.3.01 
+=============================================================================================
+net.core.somaxconn = 65535
+net.core.netdev_max_backlog = 65535
+vm.max_map_count = 536870912
+=============================================================================================
+real-time non-blocking time  (microseconds, -R) unlimited
+core file size              (blocks, -c) 0
+data seg size               (kbytes, -d) unlimited
+scheduling priority                 (-e) 0
+file size                   (blocks, -f) unlimited
+pending signals                     (-i) 514553
+max locked memory           (kbytes, -l) 16479175
+max memory size             (kbytes, -m) unlimited
+open files                          (-n) 64000
+pipe size                (512 bytes, -p) 8
+POSIX message queues         (bytes, -q) 819200
+real-time priority                  (-r) 0
+stack size                  (kbytes, -s) 8192
+cpu time                   (seconds, -t) unlimited
+max user processes                  (-u) 514553
+virtual memory              (kbytes, -v) unlimited
+file locks                          (-x) unlimited
+=============================================================================================
+      8 tcp        0      0 0.0.0.0:16039           0.0.0.0:*               LISTEN      5718/./src/proxysql 
+      8 tcp        0      0 0.0.0.0:16038           0.0.0.0:*               LISTEN      5718/./src/proxysql 
+      8 tcp        0      0 0.0.0.0:16037           0.0.0.0:*               LISTEN      5718/./src/proxysql 
+      8 tcp        0      0 0.0.0.0:16036           0.0.0.0:*               LISTEN      5718/./src/proxysql 
+      8 tcp        0      0 0.0.0.0:16035           0.0.0.0:*               LISTEN      5718/./src/proxysql 
+      8 tcp        0      0 0.0.0.0:16034           0.0.0.0:*               LISTEN      5718/./src/proxysql 
+      8 tcp        0      0 0.0.0.0:16033           0.0.0.0:*               LISTEN      5718/./src/proxysql 
+      1 tcp        0      0 0.0.0.0:16032           0.0.0.0:*               LISTEN      5718/./src/proxysql 
+      8 tcp        0      0 0.0.0.0:26036           0.0.0.0:*               LISTEN      5782/./src/proxysql 
+      8 tcp        0      0 0.0.0.0:26035           0.0.0.0:*               LISTEN      5782/./src/proxysql 
+      8 tcp        0      0 0.0.0.0:26034           0.0.0.0:*               LISTEN      5782/./src/proxysql 
+      8 tcp        0      0 0.0.0.0:26033           0.0.0.0:*               LISTEN      5782/./src/proxysql 
+      1 tcp        0      0 0.0.0.0:26032           0.0.0.0:*               LISTEN      5782/./src/proxysql 
+=============================================================================================
+Continuing with 16 connections in WAIT state ...
+Benchmark v2.3.2 on port 16033 ...
+CMD: 'sleep 10; ./connect_speed -i 0 -c 10000 -u sbtest -p sbtest -h 127.0.0.1 -P 16033 -M 8 -t 16 -q 0'
+      1 Connections[OK/ERR]: (160000,0) . Clock time: 1454ms
+      1 Connections[OK/ERR]: (160000,0) . Clock time: 1493ms
+      1 Connections[OK/ERR]: (160000,0) . Clock time: 1471ms
+SUMMARY: 3 runs, total 480000 connections, in 4418ms, at 108646 conn/s
+=============================================================================================
+Waiting 10s for 131418 connections to close ...
+Waiting 10s for 131418 connections to close ...
+Waiting 10s for 131418 connections to close ...
+Waiting 10s for 131391 connections to close ...
+Waiting 10s for 130639 connections to close ...
+Continuing with 15 connections in WAIT state ...
+Benchmark v1.4.16 on port 26033 ...
+CMD: 'sleep 10; ./connect_speed -i 0 -c 10000 -u sbtest -p sbtest -h 127.0.0.1 -P 26033 -M 8 -t 16 -q 0'
+      1 Connections[OK/ERR]: (160000,0) . Clock time: 1596ms
+      1 Connections[OK/ERR]: (160000,0) . Clock time: 1482ms
+      1 Connections[OK/ERR]: (160000,0) . Clock time: 1442ms
+SUMMARY: 3 runs, total 480000 connections, in 4520ms, at 106194 conn/s
+=============================================================================================

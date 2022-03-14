@@ -1,0 +1,73 @@
+=============================================================================================
+Building v2.3.2 ...
+	threads=32
+	max_connections=65536
+	mysql_ifaces="0.0.0.0:16032"
+	interfaces="0.0.0.0:16033;0.0.0.0:16034"
+*************************** 1. row ***************************
+@@version: 2.3.2-10-g8cd66cf
+=============================================================================================
+Building v1.4.16 ...
+	threads=32
+	max_connections=65536
+	mysql_ifaces="0.0.0.0:26032"
+	interfaces="0.0.0.0:26033;0.0.0.0:26034"
+*************************** 1. row ***************************
+@@version: v1.4.16-0-gf954ef30
+=============================================================================================
+OS: Debian GNU/Linux 11 (bullseye)
+Kernel: Linux trx 5.15.25 #1 SMP Sun Feb 27 15:15:59 UTC 2022 x86_64 GNU/Linux
+CPU: 32-Core (4-Die) AMD Ryzen Threadripper 3970X (-MT MCP MCM-) speed/min/max: 2062/2200/3700 MHz Kernel: 5.15.25 x86_64 
+Up: 6h 59m Mem: 19221.9/128743.6 MiB (14.9%) Storage: 3.73 TiB (17.7% used) Procs: 638 Shell: Bash 5.1.4 inxi: 3.3.01 
+=============================================================================================
+net.core.somaxconn = 65535
+net.core.netdev_max_backlog = 65535
+vm.max_map_count = 536870912
+=============================================================================================
+real-time non-blocking time  (microseconds, -R) unlimited
+core file size              (blocks, -c) 0
+data seg size               (kbytes, -d) unlimited
+scheduling priority                 (-e) 0
+file size                   (blocks, -f) unlimited
+pending signals                     (-i) 514553
+max locked memory           (kbytes, -l) 16479175
+max memory size             (kbytes, -m) unlimited
+open files                          (-n) 64000
+pipe size                (512 bytes, -p) 8
+POSIX message queues         (bytes, -q) 819200
+real-time priority                  (-r) 0
+stack size                  (kbytes, -s) 8192
+cpu time                   (seconds, -t) unlimited
+max user processes                  (-u) 514553
+virtual memory              (kbytes, -v) unlimited
+file locks                          (-x) unlimited
+=============================================================================================
+     32 tcp        0      0 0.0.0.0:16034           0.0.0.0:*               LISTEN      24199/./src/proxysq 
+     32 tcp        0      0 0.0.0.0:16033           0.0.0.0:*               LISTEN      24199/./src/proxysq 
+      1 tcp        0      0 0.0.0.0:16032           0.0.0.0:*               LISTEN      24199/./src/proxysq 
+     32 tcp        0      0 0.0.0.0:26034           0.0.0.0:*               LISTEN      24297/./src/proxysq 
+     32 tcp        0      0 0.0.0.0:26033           0.0.0.0:*               LISTEN      24297/./src/proxysq 
+      1 tcp        0      0 0.0.0.0:26032           0.0.0.0:*               LISTEN      24297/./src/proxysq 
+=============================================================================================
+Continuing with 23 connections in WAIT state ...
+Benchmark v2.3.2 on port 16033 ...
+CMD: 'sleep 10; ./connect_speed -i 0 -c 10000 -u sbtest -p sbtest -h 127.0.0.1 -P 16033 -M 2 -t 8 -q 0'
+      1 Connections[OK/ERR]: (80000,0) . Clock time: 1507ms
+      1 Connections[OK/ERR]: (80000,0) . Clock time: 1501ms
+      1 Connections[OK/ERR]: (80000,0) . Clock time: 1546ms
+SUMMARY: 3 runs, total 240000 connections, in 4554ms, at 52700 conn/s
+=============================================================================================
+Waiting 10s for 46745 connections to close ...
+Waiting 10s for 46745 connections to close ...
+Waiting 10s for 46757 connections to close ...
+Waiting 10s for 44493 connections to close ...
+Waiting 10s for 42799 connections to close ...
+Waiting 10s for 32159 connections to close ...
+Continuing with 24 connections in WAIT state ...
+Benchmark v1.4.16 on port 26033 ...
+CMD: 'sleep 10; ./connect_speed -i 0 -c 10000 -u sbtest -p sbtest -h 127.0.0.1 -P 26033 -M 2 -t 8 -q 0'
+      1 Connections[OK/ERR]: (80000,0) . Clock time: 1308ms
+      1 Connections[OK/ERR]: (80000,0) . Clock time: 1100ms
+      1 Connections[OK/ERR]: (80000,0) . Clock time: 1044ms
+SUMMARY: 3 runs, total 240000 connections, in 3452ms, at 69524 conn/s
+=============================================================================================
