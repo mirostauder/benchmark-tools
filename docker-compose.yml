@@ -1,0 +1,135 @@
+version: "3.3"
+
+services:
+
+  mysql57:
+    container_name: testinfra-mysql57
+    hostname: testinfra-mysql57
+#    image: proxysql/testing:testinfra-mysql57
+    image: mysql:5.7
+    ports:
+      - "13306:3306"
+    volumes:
+#     - ./docker/testinfra-mysql57/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - ./logs/:/var/log/mysql/
+    networks:
+      - testinfra
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+
+  mysql80:
+    container_name: testinfra-mysql80
+    hostname: testinfra-mysql80
+    image: mysql:8.0
+    ports:
+      - "13306:3306"
+    volumes:
+#      - ./docker/testinfra-mysql80/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - ./logs/:/var/log/mysql/
+    networks:
+      - testinfra
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+#    security_opt:
+#      - seccomp:unconfined
+    cap_add:
+      - SYS_NICE  # CAP_SYS_NICE
+
+  mysql81:
+    container_name: testinfra-mysql81
+    hostname: testinfra-mysql81
+    image: mysql:8.1
+    ports:
+      - "13306:3306"
+    volumes:
+#      - ./docker/testinfra-mysql81/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - ./logs/:/var/log/mysql/
+    networks:
+      - testinfra
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+#    security_opt:
+#      - seccomp:unconfined
+    cap_add:
+      - SYS_NICE  # CAP_SYS_NICE
+
+  mysql82:
+    container_name: testinfra-mysql82
+    hostname: testinfra-mysql82
+    image: mysql:8.2
+    ports:
+      - "13306:3306"
+    volumes:
+#      - ./docker/testinfra-mysql82/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - ./logs/:/var/log/mysql/
+    networks:
+      - testinfra
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+#    security_opt:
+#      - seccomp:unconfined
+    cap_add:
+      - SYS_NICE  # CAP_SYS_NICE
+
+  mariadb10:
+    container_name: testinfra-mariadb10
+    hostname: testinfra-mariadb10
+    image: mariadb:10
+    ports:
+      - "13306:3306"
+    volumes:
+#      - ./docker/testinfra-mysql/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - ./logs/:/var/log/mysql/
+    networks:
+      - testinfra
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+
+  mariadb11:
+    container_name: testinfra-mariadb11
+    hostname: testinfra-mariadb11
+    image: mariadb:11
+    ports:
+      - "13306:3306"
+    volumes:
+#      - ./docker/testinfra-mysql/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - ./logs/:/var/log/mysql/
+    networks:
+      - testinfra
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+
+  proxysql:
+    container_name: testinfra-proxysql
+    hostname: testinfra-proxysql
+    image: proxysql/testing:testinfra-proxysql
+    ports:
+      - "16032:6032"
+      - "16033:6033"
+      - "16070:6070"
+    volumes:
+      - ./docker/testinfra-proxysql/proxysql.cfg:/etc/proxysql.cnf
+      - ./logs/:/var/log/proxysql/
+    networks:
+      - testinfra
+#    entrypoint: ["bash", "-c", "proxysql -f --idle-threads -D /var/lib/proxysql &> /var/lib/proxysql/proxysql.log"]
+    entrypoint: bash -c "proxysql -f --idle-threads -D /var/lib/proxysql 2>&1 | tee /var/log/proxysql/${NOW}_proxysql-error.log"
+
+  proxysql-dev:
+    container_name: testinfra-proxysql-dev
+    hostname: testinfra-proxysql-dev
+    image: proxysql/testing:testinfra-proxysql-dev
+    ports:
+      - "16032:6032"
+      - "16033:6033"
+      - "16070:6070"
+    volumes:
+      - ./docker/testinfra-proxysql/proxysql.cfg:/etc/proxysql.cnf
+      - ./logs/:/var/log/proxysql/
+    networks:
+      - testinfra
+#    entrypoint: ["bash", "-c", "proxysql -f --idle-threads -D /var/lib/proxysql &> /var/lib/proxysql/proxysql.log"]
+    entrypoint: bash -c "proxysql -f --idle-threads -D /var/lib/proxysql 2>&1 | tee /var/log/proxysql/${NOW}_proxysql-error.log"
+
+networks:
+  testinfra:
