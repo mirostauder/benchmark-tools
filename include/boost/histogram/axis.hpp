@@ -21,6 +21,7 @@
 #define BOOST_HISTOGRAM_STRING_VIEW boost::string_view
 #endif
 #include <cmath>
+#include <memory>
 #include <limits>
 #include <stdexcept>
 #include <string>

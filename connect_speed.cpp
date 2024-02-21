@@ -1,9 +1,10 @@
 //#define USE_HISTOGRAM
+#define MYSQL_WITH_SSL
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <mysql/mysql.h>
-#include <mysql/my_config.h>
+//#include <mysql/my_config.h>
 #include <string.h>
 #include <time.h>
 #include <sys/socket.h>
@@ -15,6 +16,7 @@
 #include <iostream>
 
 #if MYSQL_VERSION_MAJOR > 5
+#pragma message ">>> Using SSL"
 #define MYSQL_WITH_SSL
 #endif 
 
@@ -102,6 +104,7 @@ void * my_conn_thread(void *arg) {
 				ssl_arg = SSL_MODE_REQUIRED;
 			}
 		}
+		mysql_ssl_set(mysql, NULL, NULL, NULL, NULL, NULL);
 		mysql_options(mysql, MYSQL_OPT_SSL_MODE, &ssl_arg);
 		if (auth) {
 			int rc = 0;
@@ -113,7 +116,7 @@ void * my_conn_thread(void *arg) {
 			}
 		}
 #endif
-		MYSQL *rc=mysql_real_connect(mysql, host, username, password, schema, (local ? 0 : ( port + rand()%multiport ) ), NULL, 0);
+		MYSQL *rc=mysql_real_connect(mysql, host, username, password, schema, (local ? 0 : ( port + rand()%multiport ) ), NULL, CLIENT_SSL);
 		//mysql_set_character_set(mysql, "utf8");
 		if (queries==0) {
 			// we computed this only if queries==0
