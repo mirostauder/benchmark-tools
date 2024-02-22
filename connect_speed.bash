@@ -19,11 +19,20 @@ fn_multiport () {
 }
 
 fn_mquery () {
-	mysql --default-auth=mysql_native_password -uroot -proot -h127.0.0.1 -P3306 -e "${1}" 2>&1 | grep -vP "mysql: .?Warning"
+	mysql --default-auth=mysql_native_password -uroot -proot -htestinfra-${DB} -P3306 -e "${1}" 2>&1 | grep -vP "mysql: .?Warning"
 }
 
 fn_pquery () {
 	mysql --default-auth=mysql_native_password -uadmin -padmin -h127.0.0.1 -P6032 -e "${1}" 2>&1 | grep -vP "mysql: .?Warning"
+}
+
+fn_mwait () {
+	echo -en "Waiting for ${DB} "
+	until [[ $(fn_mquery "SELECT 1;" | tr -d '\n') == "11" ]]; do
+		echo -en "."
+		sleep 1
+	done
+	echo
 }
 
 fn_build () {
@@ -65,16 +74,16 @@ fn_build () {
 		#./src/proxysql -f -c ./src/proxysql.cfg -D ./src  &> /dev/null &
 		#sleep 5
 
-		#mysql --default-auth=mysql_native_password -u admin -padmin -h 127.0.0.1 -P $(expr $OFFSET + 6032) -e "INSERT INTO mysql_users (username,password) VALUES ('sbtest','sbtest'); LOAD mysql users TO RUNTIME; SAVE mysql users TO DISK;" 2>&1 | grep -vP "mysql: .?Warning"
-		#mysql --default-auth=mysql_native_password -u admin -padmin -h 127.0.0.1 -P $(expr $OFFSET + 6032) -e "SET mysql-interfaces = '0.0.0.0:$(expr $OFFSET + 6033),0.0.0.0:$(expr $OFFSET + 6034),0.0.0.0:$(expr $OFFSET + 6035),0.0.0.0:$(expr $OFFSET + 6036)';" 2>&1 | grep -vP "mysql: .?Warning"
-		#mysql --default-auth=mysql_native_password -u admin -padmin -h 127.0.0.1 -P $(expr $OFFSET + 6032) -e "SELECT @@version;" -E 2>&1 | grep -vP "mysql: .?Warning" | grep version
+		#fn_pquery "INSERT INTO mysql_users (username,password) VALUES ('sbtest','sbtest'); LOAD mysql users TO RUNTIME; SAVE mysql users TO DISK;" 2>&1 | grep -vP "mysql: .?Warning"
+		#fn_pquery "SET mysql-interfaces = '0.0.0.0:$(expr $OFFSET + 6033),0.0.0.0:$(expr $OFFSET + 6034),0.0.0.0:$(expr $OFFSET + 6035),0.0.0.0:$(expr $OFFSET + 6036)';" 2>&1 | grep -vP "mysql: .?Warning"
+		#fn_pquery "SELECT @@version;" | grep version
 
 		popd &> /dev/null
 	done
 }
 
 fn_gitver() {
-	mysql --default-auth=mysql_native_password -u admin -padmin -h 127.0.0.1 -P $(expr $OFFSET + 6032) -e "SELECT @@version;" -E 2>&1 | grep -vP "mysql: .?Warning" | grep version
+	fn_pquery "SELECT @@version;" -E 2>&1 | grep -vP "mysql: .?Warning" | grep version
 }
 
 fn_waitstate() {
@@ -99,19 +108,18 @@ fn_benchmark () {
 		SUMM=0
 #		let OFFSET+=10000
 
-		#CMD="./connect_speed -i 0 -c 1000 -u sbtest -p sbtest -h 127.0.0.1 -P $(expr $OFFSET + 6033) -t 10 -q 0"
 		CMD=$(eval echo "${1}")
 
 		echo "Starting proxysql $VER ..."
 		killall proxysql
-#		docker-compose -p connect_speed down
+		docker-compose -p connect_speed down
 		sleep 60
-#		./proxysql.${VER}/src/proxysql -f -c ./proxysql.${VER}/src/proxysql.cfg -D ./proxysql.${VER}/src &> /dev/null &
 		pushd proxysql.${VER}/src &> /dev/null
-		./proxysql -f -D . &> /dev/null &
+		./proxysql -f --idle-threads -D . &> /dev/null &
 		popd &> /dev/null
 
-#		docker-compose -p connect_speed up -d ${DB} && sleep 30
+		docker-compose -p connect_speed up -d ${DB} && fn_mwait
+		fn_mquery "CREATE USER 'sbtest'@'%' IDENTIFIED BY 'sbtest'; GRANT ALL PRIVILEGES ON *.* TO 'sbtest'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;"
 
 		CNT=$(netstat -ntpl | grep -P ':\d?60[3456789]\d' | uniq -c | grep -v 6032 | wc -l)
 		echo -n "Waiting for $MULTI ports to listen ..."
@@ -123,11 +131,13 @@ fn_benchmark () {
 		echo
 #		netstat -ntpl | grep -P ':\d60[3456789]\d' | uniq -c
 
-		mysql --default-auth=mysql_native_password -u admin -padmin -h 127.0.0.1 -P $(expr $OFFSET + 6032) -e "INSERT INTO mysql_users (username,password) VALUES ('sbtest','sbtest'); LOAD mysql users TO RUNTIME; SAVE mysql users TO DISK;" 2>&1 | grep -vP "mysql: .?Warning"
-#		mysql --default-auth=mysql_native_password -u admin -padmin -h 127.0.0.1 -P $(expr $OFFSET + 6032) -e "SET admin-admin_credentials='admin:admin;cluster1:secret1pass;sbtest:sbtest'; LOAD admin variables TO RUNTIME; SAVE admin variables TO DISK;" 2>&1 | grep -vP "mysql: .?Warning"
-#		fn_pquery "INSERT INTO mysql_users (username,password,fast_forward) VALUES ('sbtest','sbtest',0); LOAD MYSQL USERS TO RUNTIME;"
-#		fn_pquery "DELETE FROM mysql_servers; INSERT INTO mysql_servers (hostgroup_id,hostname,port,max_connections) VALUES (0,'testinfra-${DB}',3306,1000); LOAD MYSQL SERVERS TO RUNTIME;"
-		echo "Benchmark $(fn_gitver) on port $(expr $OFFSET + 6033)+ ..."
+#		fn_pquery "INSERT INTO mysql_users (username,password) VALUES ('sbtest','sbtest'); LOAD mysql users TO RUNTIME; SAVE mysql users TO DISK;"
+#		fn_pquery "SET admin-admin_credentials='admin:admin;cluster1:secret1pass;sbtest:sbtest'; LOAD admin variables TO RUNTIME; SAVE admin variables TO DISK;"
+		fn_pquery "INSERT INTO mysql_users (username,password,fast_forward) VALUES ('sbtest','sbtest',0); LOAD mysql users TO RUNTIME; SAVE mysql users TO DISK;"
+		fn_pquery "DELETE FROM mysql_servers; INSERT INTO mysql_servers (hostgroup_id,hostname,port,max_connections) VALUES (0,'testinfra-${DB}',3306,1000); LOAD mysql servers TO RUNTIME; SAVE mysql servers TO DISK;"
+
+#		echo "Benchmark $(fn_gitver) on port $(expr $OFFSET + 6033)+ ..."
+		echo "Benchmark $(fn_gitver) on ports ${MPORT/0.0.0.0:/} ..."
 		echo "CMD: '${CMD}'"
 
 		for N in $(seq $LOOP); do
@@ -155,7 +165,7 @@ fn_benchmark () {
 		CPS=$(expr $TOTAL '*' 1000 '/' $SUMM)
 		echo "SUMMARY: ${LOOP} runs, total $TOTAL connections, in ${SUMM}ms, at $CPS conn/s"
 
-#		docker-compose -p connect_speed down
+		docker-compose -p connect_speed down
 		while [[ $(netstat -ntpl) =~ proxysql ]]; do 
 			killall proxysql
 			sleep ${PAUSE}
@@ -196,10 +206,10 @@ fn_sysstats () {
 
 NCPUS=32
 MULTI=1
-VERS="v1.4.16 v2.0.17 v2.3.2 v2.5.5 v2.x v2.6.0-update_to_openssl_v3.1.5 v2.6.0-update_to_openssl_v3.2.1"
+#VERS="v1.4.16 v2.0.17 v2.3.2 v2.5.5 v2.x v2.6.0-update_to_openssl_v3.1.5 v2.6.0-update_to_openssl_v3.2.1"
 #VERS="v2.6.0-update_to_openssl_v3.1.5 v2.6.0-update_to_openssl_v3.2.1"
 #VERS="v2.x v2.5.5 v2.3.2 v2.0.17 v1.4.16"
-#VERS="v2.3.2"
+VERS="v2.x"
 LOOP=3
 PAUSE=10
 
@@ -210,8 +220,8 @@ fn_build
 
 fn_sysstats
 
-fn_benchmark "./connect_speed -i 0 -c 1000 -u sbtest -p sbtest -h 127.0.0.1 -P $PORT -M $MULTI -t 32 -q 0"
-#fn_benchmark "./connect_speed -i 0 -c 1000 -u sbtest -p sbtest -h 127.0.0.1 -S required -P $PORT -M $MULTI -t 32 -q 0"
+#fn_benchmark "./connect_speed -i 0 -c 100 -u sbtest -p sbtest -h 127.0.0.1 -P $PORT -M $MULTI -t 32 -q 0"
+fn_benchmark "./connect_speed -i 0 -c 100 -u sbtest -p sbtest -h 127.0.0.1 -S required -P $PORT -M $MULTI -t 32 -q 0"
 
 # test admmin port with query
 #fn_benchmark "./connect_speed -i 0 -c 1000 -u admin -p admin -h 127.0.0.1 -P 6032 -M 1 -t 32 -q 1"
