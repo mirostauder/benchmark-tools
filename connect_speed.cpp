@@ -103,9 +103,9 @@ void * my_conn_thread(void *arg) {
 			if (strcmp(ssl,"required")==0) {
 				ssl_arg = SSL_MODE_REQUIRED;
 			}
+			mysql_ssl_set(mysql, NULL, NULL, NULL, NULL, NULL);
+			mysql_options(mysql, MYSQL_OPT_SSL_MODE, &ssl_arg);
 		}
-		mysql_ssl_set(mysql, NULL, NULL, NULL, NULL, NULL);
-		mysql_options(mysql, MYSQL_OPT_SSL_MODE, &ssl_arg);
 		if (auth) {
 			int rc = 0;
 			rc = mysql_options(mysql, MYSQL_DEFAULT_AUTH, auth);
@@ -115,8 +115,10 @@ void * my_conn_thread(void *arg) {
 				exit(EXIT_FAILURE);
 			}
 		}
+		MYSQL *rc=mysql_real_connect(mysql, host, username, password, schema, (local ? 0 : ( port + rand()%multiport ) ), NULL, ssl == 0 ? 0 : CLIENT_SSL);
+#else
+		MYSQL *rc=mysql_real_connect(mysql, host, username, password, schema, (local ? 0 : ( port + rand()%multiport ) ), NULL, 0);
 #endif
-		MYSQL *rc=mysql_real_connect(mysql, host, username, password, schema, (local ? 0 : ( port + rand()%multiport ) ), NULL, CLIENT_SSL);
 		//mysql_set_character_set(mysql, "utf8");
 		if (queries==0) {
 			// we computed this only if queries==0
